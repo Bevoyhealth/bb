@@ -40,10 +40,13 @@ Through this route, each message you send shows your name in the thread.
 Tailscale Serve adds the `Tailscale-User-Login` and `Tailscale-User-Name`
 headers for a device that a tailnet user owns. The server reads them only from
 a loopback peer and never from a bb connect request, and records them as the
-message author. An edit keeps the original author and records the editor.
-`bb thread queue list` shows the author's login in the Sender column. Messages
-from agents, plugins, the `bb` CLI, tagged devices, and other routes have no
-author. Messages sent before this feature show no author.
+message author. An edit of a sent message keeps the original author and
+records the editor. An edit of a queued message keeps the author and records no
+editor. `bb thread queue list` shows the author's login in the Sender column.
+A `bb` CLI on another device that targets the Tailscale Serve URL sends as its
+tailnet user. Messages from agents, from processes on the server machine such
+as plugins and the local `bb` CLI, from tagged devices, and from other routes
+have no author. Messages sent before this feature show no author.
 
 Any process on the server machine can reach the loopback port and set these
 headers. Author names therefore identify teammates who share a trusted server.

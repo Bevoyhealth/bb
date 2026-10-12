@@ -129,6 +129,16 @@ describe("message author from the Tailscale identity", () => {
       headers: { "x-bb-gate-auth": "session" },
       peer: LOOPBACK_PEER,
     },
+    {
+      label: "an unrecognized bb connect marker",
+      headers: { "x-bb-gate-auth": "other" },
+      peer: LOOPBACK_PEER,
+    },
+    {
+      label: "an empty bb connect marker",
+      headers: { "x-bb-gate-auth": "" },
+      peer: LOOPBACK_PEER,
+    },
   ])("ignores the Tailscale headers from $label", async ({ headers, peer }) => {
     await withTestHarness(async (harness) => {
       const thread = seedBusyThread(harness, 3);

@@ -86,7 +86,7 @@ function decodeEncodedWord(value: string): string {
 export function getRequestAuthor(
   context: GateAuthHeaderReader & TrustedRemoteAddressReader,
 ): MessageAuthor | null {
-  if (getGateAuthKind(context) !== null) return null;
+  if (context.req.header(GATE_AUTH_HEADER_NAME) !== undefined) return null;
   const remoteAddress = getTrustedRemoteAddress(context);
   if (remoteAddress === undefined || !isLoopbackAddress(remoteAddress)) {
     return null;
