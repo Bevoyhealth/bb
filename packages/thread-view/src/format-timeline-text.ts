@@ -392,7 +392,14 @@ function formatRow(
   switch (row.kind) {
     case "conversation":
       return [
-        rowHeader(row.role === "user" ? "User" : "Assistant", context),
+        rowHeader(
+          row.role === "user"
+            ? row.author === null
+              ? "User"
+              : `User · ${row.author.name}`
+            : "Assistant",
+          context,
+        ),
         row.text,
         formatConversationRequestLabel(row),
       ]

@@ -7,6 +7,7 @@ import {
   getThread,
 } from "@bb/db";
 import type {
+  MessageAuthor,
   ProjectExecutionDefaults,
   Project,
   Thread,
@@ -79,6 +80,7 @@ interface CreateProvisioningThreadArgs {
     typeof buildExecutionOptions
   >[2]["projectDefaults"];
   fork: ThreadForkPoint | null;
+  messageAuthor: MessageAuthor | null;
   request: ThreadCreateServiceRequest;
   providerInput?: ThreadCreateServiceRequestInput["input"];
 }
@@ -447,6 +449,7 @@ async function createPendingThreadAndAttemptFirstDispatch(
       executionDefaults: executionPlanArgs,
       origin: args.request.origin,
       originPluginId: args.request.originPluginId ?? null,
+      messageAuthor: args.messageAuthor,
       startedOnBehalfOf: args.request.startedOnBehalfOf,
       trigger: "user",
     });
@@ -516,9 +519,10 @@ export async function createThreadFromRequest(
   deps: ThreadCreateDeps,
   rawRequestInput: ThreadCreateServiceRequestInput,
   options: {
+    messageAuthor: MessageAuthor | null;
     providerInput?: ThreadCreateServiceRequestInput["input"];
     forkSourceEnvironmentId?: string;
-  } = {},
+  } = { messageAuthor: null },
 ) {
   const project = requirePublicProjectForThreadCreate(
     deps,
@@ -769,6 +773,7 @@ export async function createThreadFromRequest(
     environmentIntent,
     executionDefaults: resolvedExecutionDefaults,
     fork,
+    messageAuthor: options.messageAuthor,
     ...(options.providerInput !== undefined
       ? { providerInput: options.providerInput }
       : {}),
@@ -786,6 +791,7 @@ export async function createThreadFromRequest(
     },
   });
   const { initiator } = resolveDispatchAuthor({
+    messageAuthor: options.messageAuthor,
     retrying: false,
     senderThreadId: null,
     startedOnBehalfOf: request.startedOnBehalfOf,

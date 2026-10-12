@@ -16,6 +16,7 @@ import {
 } from "@bb/db";
 import {
   threadScope,
+  type MessageAuthor,
   type PromptInput,
   type Thread,
   type ThreadEvent,
@@ -61,6 +62,7 @@ type ThreadRewindPrepareCommand = Extract<
 >;
 
 interface EditableTurn {
+  author: MessageAuthor | null;
   leadingAgentOnlyInput: PromptInput[];
   currentTurnId: string;
   oldMaxSequence: number;
@@ -319,6 +321,7 @@ function resolveEditableTurnCandidate(
     );
   }
   return {
+    author: request.author ?? null,
     leadingAgentOnlyInput: getLeadingAgentOnlyInput(request.input),
     currentTurnId: accepted.turnId,
     oldMaxSequence,
@@ -423,6 +426,7 @@ function rewindPrepareCommandFromStart(
 export async function editThreadMessage(
   deps: LoggedPendingInteractionWorkSessionDeps,
   args: {
+    editor: MessageAuthor | null;
     environment: Parameters<typeof requireReadyThreadEnvironment>[0];
     payload: EditMessageRequest;
     thread: Thread;
@@ -463,6 +467,7 @@ export async function editThreadMessage(
     targetThread: initialThread,
   });
   const { initiator } = resolveDispatchAuthor({
+    messageAuthor: args.editor,
     retrying: false,
     senderThreadId,
     startedOnBehalfOf: null,
@@ -626,6 +631,8 @@ export async function editThreadMessage(
         input: [...target.leadingAgentOnlyInput, ...sendPayload.input],
         mode: "start",
       },
+      messageAuthor: target.author,
+      ...(args.editor !== null ? { editor: args.editor } : {}),
       thread: editableThread,
       trigger: "user",
     });

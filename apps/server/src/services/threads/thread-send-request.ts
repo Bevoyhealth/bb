@@ -1,4 +1,8 @@
-import { isStandaloneBuiltinClearCommand, type Thread } from "@bb/domain";
+import {
+  isStandaloneBuiltinClearCommand,
+  type MessageAuthor,
+  type Thread,
+} from "@bb/domain";
 import type {
   SendMessageRequest,
   SendMessageResponse,
@@ -10,6 +14,7 @@ import { sendThreadMessage } from "./thread-send.js";
 import { assertThreadHostAcceptsWork } from "./thread-host-admission.js";
 
 interface AcceptThreadSendRequestArgs {
+  messageAuthor: MessageAuthor | null;
   payload: SendMessageRequest;
   thread: Thread;
 }
@@ -25,6 +30,7 @@ export async function acceptThreadSendRequest(
     });
     await sendThreadMessage(deps, {
       environment,
+      messageAuthor: args.messageAuthor,
       payload: args.payload,
       thread: args.thread,
       trigger: "user",
@@ -40,6 +46,7 @@ export async function acceptThreadSendRequest(
     pluginSubmission: args.payload.pluginSubmission ?? null,
     origin: null,
     originPluginId: null,
+    messageAuthor: args.messageAuthor,
     startedOnBehalfOf: null,
     trigger: "user",
   });

@@ -1262,6 +1262,11 @@ function repairBranchLocalQueuedGroupingBeforeInitialThreadSections(
 const STAGED_CONNECT_MACHINE_ID_COLUMN = "_bb_connect_machine_id_pending";
 const STAGED_THREAD_STORAGE_DELETED_AT_COLUMN =
   "_bb_thread_storage_deleted_at_pending";
+const QUEUED_MESSAGE_AUTHOR_COLUMNS = ["author_login", "author_name"] as const;
+
+function stagedQueuedMessageAuthorColumn(column: string): string {
+  return `_bb_queued_${column}_pending`;
+}
 
 function stageExistingConnectMachineIdColumn(
   db: DbConnection,
@@ -1343,6 +1348,49 @@ function restoreStagedThreadStorageDeletedAtColumn(db: DbConnection): void {
     `UPDATE threads SET storage_deleted_at = ${STAGED_THREAD_STORAGE_DELETED_AT_COLUMN};
      ALTER TABLE threads DROP COLUMN ${STAGED_THREAD_STORAGE_DELETED_AT_COLUMN};`,
   );
+}
+
+function stageExistingQueuedMessageAuthorColumns(
+  db: DbConnection,
+  migrationsFolder: string,
+): boolean {
+  if (
+    !tableExists(db, "__drizzle_migrations") ||
+    !tableExists(db, "queued_thread_messages") ||
+    !columnExists(db, "queued_thread_messages", "author_login")
+  ) {
+    return false;
+  }
+  const migration = requireExpectedAppliedMigration(
+    readExpectedAppliedMigrations(migrationsFolder),
+    "0134_queued_message_author",
+  );
+  if (readAppliedMigrationCreatedAts(db).has(migration.createdAt)) {
+    return false;
+  }
+  for (const column of QUEUED_MESSAGE_AUTHOR_COLUMNS) {
+    db.$client.exec(
+      `ALTER TABLE queued_thread_messages RENAME COLUMN ${column} TO ${stagedQueuedMessageAuthorColumn(column)}`,
+    );
+  }
+  return true;
+}
+
+function restoreStagedQueuedMessageAuthorColumns(db: DbConnection): void {
+  for (const column of QUEUED_MESSAGE_AUTHOR_COLUMNS) {
+    const staged = stagedQueuedMessageAuthorColumn(column);
+    if (!columnExists(db, "queued_thread_messages", staged)) continue;
+    if (!columnExists(db, "queued_thread_messages", column)) {
+      db.$client.exec(
+        `ALTER TABLE queued_thread_messages RENAME COLUMN ${staged} TO ${column}`,
+      );
+      continue;
+    }
+    db.$client.exec(
+      `UPDATE queued_thread_messages SET ${column} = ${staged};
+       ALTER TABLE queued_thread_messages DROP COLUMN ${staged};`,
+    );
+  }
 }
 
 function seedKeepAwakePluginConfiguration(db: DbConnection): void {
@@ -1584,12 +1632,18 @@ export function migrate(db: DbConnection, options: MigrateOptions = {}): void {
     );
     const stagedThreadStorageDeletedAt =
       stageExistingThreadStorageDeletedAtColumn(db, migrationsFolder);
+    const stagedQueuedMessageAuthor = stageExistingQueuedMessageAuthorColumns(
+      db,
+      migrationsFolder,
+    );
     try {
       drizzleMigrate(db, { migrationsFolder });
     } finally {
       if (stagedConnectMachineId) restoreStagedConnectMachineIdColumn(db);
       if (stagedThreadStorageDeletedAt)
         restoreStagedThreadStorageDeletedAtColumn(db);
+      if (stagedQueuedMessageAuthor)
+        restoreStagedQueuedMessageAuthorColumns(db);
     }
     applyReorderedCleanupMigrations(db, migrationsFolder);
     applyQueuedMessageGroupingSchema(db);

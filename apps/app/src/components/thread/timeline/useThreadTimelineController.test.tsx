@@ -105,6 +105,8 @@ function makeUserRow(
     attachments: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
+    editor: null,
     systemMessageKind: "unlabeled",
     systemMessageSubject: null,
     turnRequest: { isGrouped: false, kind: "message", status: "accepted" },

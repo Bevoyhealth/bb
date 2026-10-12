@@ -41,6 +41,12 @@ const threadTurnInitiatorValues = ["user", "agent", "system"] as const;
 export const threadTurnInitiatorSchema = z.enum(threadTurnInitiatorValues);
 export type ThreadTurnInitiator = z.infer<typeof threadTurnInitiatorSchema>;
 
+export const messageAuthorSchema = z.object({
+  login: z.string().min(1),
+  name: z.string().min(1),
+});
+export type MessageAuthor = z.infer<typeof messageAuthorSchema>;
+
 /**
  * Execution values are historical facts once recorded in the event stream.
  * The stored-event boundary therefore accepts the two retired modes without
@@ -90,6 +96,8 @@ export const turnRequestEventDataSchema = z.object({
   source: z.enum(["spawn", "tell"]),
   initiator: threadTurnInitiatorSchema,
   senderThreadId: z.string().nullable(),
+  author: messageAuthorSchema.nullable().optional(),
+  editor: messageAuthorSchema.nullable().optional(),
   systemMessageKind: systemMessageKindSchema.optional(),
   systemMessageSubject: systemMessageSubjectSchema.nullable().optional(),
   input: z.array(promptInputSchema),

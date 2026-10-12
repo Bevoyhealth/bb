@@ -127,6 +127,7 @@ describe("checkpoint identity through runtime, ingestion, and editing", () => {
               threadId: source.id,
               environmentId: environment.id,
               execution,
+              author: null,
               initiator: "user",
               senderThreadId: null,
               input,
@@ -157,6 +158,7 @@ describe("checkpoint identity through runtime, ingestion, and editing", () => {
           const thread = getThread(harness.db, source.id);
           if (!thread) throw new Error("Missing source thread");
           const edit = editThreadMessage(harness.deps, {
+            editor: null,
             environment,
             thread,
             payload: {

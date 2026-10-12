@@ -1,4 +1,4 @@
-import type { JsonValue, ThreadEventPlanStep } from "@bb/domain";
+import type { JsonValue, MessageAuthor, ThreadEventPlanStep } from "@bb/domain";
 import type {
   TimelineActivityIntent,
   TimelineApprovalStatus,
@@ -54,6 +54,8 @@ interface BaseRowArgs extends RowBaseOverrideArgs {
 
 interface ConversationRowArgs extends RowBaseOverrideArgs {
   attachments?: TimelineConversationAttachments | null;
+  author?: MessageAuthor | null;
+  editor?: MessageAuthor | null;
   id?: string;
   initiator?: ThreadTurnInitiator;
   role?: TimelineConversationRow["role"];
@@ -446,7 +448,9 @@ function baseRow({
 
 export function conversationRow({
   attachments = null,
+  author = null,
   createdAt,
+  editor = null,
   id = DEFAULT_CONVERSATION_ID,
   initiator,
   role = "assistant",
@@ -488,6 +492,8 @@ export function conversationRow({
           : resolvedInitiator === "agent"
             ? "thr_sender"
             : null,
+      author,
+      editor,
       systemMessageKind,
       systemMessageSubject,
       turnRequest: turnRequest ?? {

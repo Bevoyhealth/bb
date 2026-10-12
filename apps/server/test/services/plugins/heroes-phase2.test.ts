@@ -227,6 +227,7 @@ describe("hero plugin: agent-enrichment (Phase 2 surfaces)", () => {
       },
     ];
     await sendThreadMessage(harness.deps, {
+      messageAuthor: null,
       environment,
       payload: {
         input,
@@ -264,6 +265,7 @@ describe("hero plugin: agent-enrichment (Phase 2 surfaces)", () => {
     const { environment, thread } = seedThreadFixture(4);
     await expect(
       sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: [

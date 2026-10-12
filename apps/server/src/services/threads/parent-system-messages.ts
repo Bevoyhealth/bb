@@ -131,6 +131,7 @@ function parentSystemTurnRequestFields(
     type: "client/turn/requested",
     input: args.input,
     execution: args.execution,
+    author: null,
     initiator: "system",
     senderThreadId: null,
     systemMessageKind: args.systemMessageKind,
@@ -270,6 +271,7 @@ async function queueActiveParentSystemMessage(
         origin: null,
         originPluginId: null,
         requestedBy: null,
+        author: null,
         systemNotice: {
           kind: args.systemMessageKind,
           subject: args.systemMessageSubject,
@@ -540,6 +542,7 @@ async function deliverParentSystemMessageWithContextGuard(
   );
   if (
     await dispatchTurnDuringReprovision({
+      author: null,
       deps,
       environment,
       execution,

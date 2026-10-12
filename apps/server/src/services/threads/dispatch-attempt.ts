@@ -13,6 +13,7 @@ import {
   type RunningThreadRow,
 } from "@bb/db";
 import {
+  type MessageAuthor,
   promptInputSchema,
   type PromptInput,
   type QueuedMessagePayload,
@@ -231,6 +232,7 @@ export interface DispatchAttemptArgs {
   retryOf?: TurnRequestRetryMarker;
   origin: ThreadCreateOrigin | null;
   originPluginId: string | null;
+  messageAuthor: MessageAuthor | null;
   startedOnBehalfOf: StartedOnBehalfOf | null;
   /** Execution defaults resolved by creation, which the thread row lacks. */
   executionDefaults?: Parameters<typeof buildExecutionOptions>[2];
@@ -334,6 +336,7 @@ async function runDispatchAttempt(
           titleProvided: interruptedStartupRequest.titleProvided,
         };
   const author = resolveDispatchAuthor({
+    messageAuthor: args.messageAuthor,
     retrying: args.retryOf !== undefined,
     senderThreadId,
     startedOnBehalfOf: args.startedOnBehalfOf,
@@ -357,6 +360,7 @@ async function runDispatchAttempt(
     origin: args.origin,
     originPluginId: args.originPluginId,
     requestedBy: args.startedOnBehalfOf,
+    author: author.author,
     payload: args.queuePayload,
     systemNotice: null,
   };
@@ -498,6 +502,7 @@ async function runDispatchAttempt(
     if (firstDispatch) {
       admitted.value = await admitPendingThread(deps, {
         claimed,
+        messageAuthor: args.messageAuthor,
         payload: resolvedPayload,
         respectManualStopPause,
         startContext: args.startContext ?? retryStartContext,
@@ -594,6 +599,7 @@ async function runDispatchAttempt(
   try {
     await sendThreadMessage(deps, {
       environment,
+      messageAuthor: args.messageAuthor,
       payload: resolvedPayload,
       thread,
       trigger: args.trigger,
@@ -675,6 +681,7 @@ function consumeClaimedRows(
 
 interface AdmitPendingThreadArgs {
   claimed: ClaimedQueuedThreadMessageRow[] | null;
+  messageAuthor: MessageAuthor | null;
   payload: SendMessageRequest & { inputGroups?: PromptInput[][] };
   respectManualStopPause: boolean;
   /** Creation's own record; null on a re-attempt, which reads it back. */
@@ -764,6 +771,7 @@ async function admitPendingThread(
           execution,
           fork: startContext.fork,
           input: args.payload.input,
+          messageAuthor: args.messageAuthor,
           ...(startContext.providerInput === undefined
             ? {}
             : { providerInput: startContext.providerInput }),

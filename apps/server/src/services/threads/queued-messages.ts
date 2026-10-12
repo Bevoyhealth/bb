@@ -21,6 +21,7 @@ import {
   queuedMessageSystemNoticeSchema,
 } from "@bb/domain";
 import type {
+  MessageAuthor,
   PromptInput,
   QueuedMessageWaitingOn,
   Thread,
@@ -46,6 +47,7 @@ import { isCommandTimeoutError } from "../lib/error-log-fields.js";
 import {
   parseStoredQueuedThreadMessageWaitingOn,
   storedQueuedThreadMessageRequestedBy,
+  storedQueuedThreadMessageAuthor,
   toThreadQueuedMessage,
 } from "./thread-queued-messages.js";
 import {
@@ -184,6 +186,7 @@ async function requireReadyQueuedMessageEnvironment(
 }
 
 export interface CreateQueuedMessageForThreadArgs {
+  messageAuthor: MessageAuthor | null;
   payload: CreateQueuedMessageRequest;
   thread: Thread;
 }
@@ -245,6 +248,7 @@ export async function createQueuedMessageForThread(
           threadId: thread.id,
           content: payload.input,
           senderThreadId,
+          author: senderThreadId === null ? args.messageAuthor : null,
           model: execution.model,
           reasoningLevel: execution.reasoningLevel,
           permissionMode: execution.permissionMode,
@@ -553,6 +557,7 @@ async function sendClaimedQueuedMessageForIdleProviderThread(
         throw createQueuedMessageClaimLostError();
       }
       const request = appendClientTurnEventInTransaction(tx, {
+        author: queuedMessage.author,
         environmentId: thread.environmentId,
         execution,
         initiator,
@@ -719,6 +724,7 @@ async function sendClaimedQueuedMessageForThread(
       : {}),
     origin: lead.origin,
     originPluginId: lead.originPluginId,
+    messageAuthor: storedQueuedThreadMessageAuthor(lead),
     startedOnBehalfOf: storedQueuedThreadMessageRequestedBy(lead),
     trigger: "auto-dispatch",
   });

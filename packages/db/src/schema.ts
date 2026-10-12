@@ -995,6 +995,8 @@ export const queuedThreadMessages = sqliteTable(
       enum: startedOnBehalfOfInitiatorValues,
     }),
     requestedByThreadId: text("requested_by_thread_id"),
+    authorLogin: text("author_login"),
+    authorName: text("author_name"),
     model: text("model").notNull(),
     reasoningLevel: text("reasoning_level").notNull(),
     permissionMode: text("permission_mode").$type<PermissionMode>().notNull(),

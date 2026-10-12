@@ -72,6 +72,8 @@ function UserMessage({
         initiator="user"
         originKind={null}
         senderThreadId={null}
+        author={null}
+        editor={null}
         senderThreadTitle={null}
         senderIsPluginSideChat={false}
         resolveSegmentLinkHref={resolveThreadLink}

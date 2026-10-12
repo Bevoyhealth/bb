@@ -109,7 +109,7 @@ function printQueueTable(rows: ThreadQueuedMessagesResult): void {
     row.id,
     row.threadId,
     row.initiator === "user"
-      ? ""
+      ? (row.author?.login ?? "")
       : row.initiator === "system"
         ? "System"
         : (row.senderThreadId ?? "Agent"),

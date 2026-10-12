@@ -289,6 +289,7 @@ describe("user message telemetry", () => {
       });
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("telemetry user send"),
@@ -329,6 +330,7 @@ describe("user message telemetry", () => {
       });
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("telemetry agent send"),
@@ -374,6 +376,7 @@ describe("active thread admission before host readiness", () => {
 
         await expect(
           acceptThreadSendRequest(harness.deps, {
+            messageAuthor: null,
             thread: snapshot === "stale" ? thread : current,
             payload: { input: textInput("begin another turn"), mode: "start" },
           }),
@@ -410,6 +413,7 @@ describe("active thread admission before host readiness", () => {
 
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           thread,
           payload: {
             input: textInput("follow up later"),
@@ -440,6 +444,7 @@ describe("startup queue waits", () => {
       ]) {
         await expect(
           acceptThreadSendRequest(harness.deps, {
+            messageAuthor: null,
             payload: {
               input: textInput(text),
               mode: "steer-if-active",
@@ -585,6 +590,7 @@ describe("startup queue waits", () => {
 
         await expect(
           acceptThreadSendRequest(harness.deps, {
+            messageAuthor: null,
             payload: {
               input: textInput(`follow-up after ${operation}`),
               mode: "steer",
@@ -624,6 +630,7 @@ describe("startup queue waits", () => {
 
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input: textInput("do not strand this steer"),
             mode: "steer",
@@ -663,6 +670,7 @@ describe("startup queue waits", () => {
 
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input,
             mode: "steer-if-active",
@@ -778,6 +786,7 @@ describe("startup queue waits", () => {
 
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input,
             mode: "steer",
@@ -794,6 +803,7 @@ describe("startup queue waits", () => {
       });
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input: secondInput,
             mode: "auto",
@@ -893,6 +903,7 @@ describe("startup queue waits", () => {
       vi.spyOn(threadEvents, "getActiveTurnId").mockReturnValueOnce(null);
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input: textInput("send after the wake scan"),
             mode: "steer",
@@ -1039,6 +1050,7 @@ describe("startup queue waits", () => {
 
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: {
             input: textInput("carry on without waiting for the card"),
             mode: "auto",
@@ -1108,6 +1120,7 @@ describe("turn submit failure settlement", () => {
       if (!activeThread) throw new Error("Expected an active thread");
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("failed steer"),
@@ -1164,6 +1177,7 @@ describe("turn submit failure settlement", () => {
       if (!activeThread) throw new Error("Expected an active thread");
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("late failed steer"),
@@ -1228,6 +1242,7 @@ describe("turn submit failure settlement", () => {
       if (!activeThread) throw new Error("Expected an active thread");
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("accepted steer"),
@@ -1282,6 +1297,7 @@ describe("idle cold-start activation", () => {
       });
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: textInput("cold start from idle"),
@@ -1363,6 +1379,7 @@ describe("idle cold-start activation", () => {
       }
 
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment: targetEnvironment,
         payload: {
           input: textInput("start after switch"),
@@ -1414,6 +1431,7 @@ describe("service tier execution lifecycle", () => {
         serviceTier: "fast",
       });
       const queued = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: { input: textInput("queued fast turn"), serviceTier: "fast" },
       });
@@ -1461,6 +1479,7 @@ describe("service tier execution lifecycle", () => {
         });
         await expect(
           acceptThreadSendRequest(harness.deps, {
+            messageAuthor: null,
             thread,
             payload: {
               input: textInput("change tier"),
@@ -1494,6 +1513,7 @@ describe("service tier execution lifecycle", () => {
         serviceTier: "fast",
       });
       const older = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: {
           input: textInput("older standard turn"),
@@ -1501,6 +1521,7 @@ describe("service tier execution lifecycle", () => {
         },
       });
       const newer = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: { input: textInput("newer fast turn"), serviceTier: "fast" },
       });
@@ -1552,6 +1573,7 @@ describe("service tier execution lifecycle", () => {
         serviceTier: "fast",
       });
       const result = await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: {
           input: textInput("wait for standard"),
@@ -1580,12 +1602,14 @@ describe("service tier execution lifecycle", () => {
         serviceTier: "fast",
       });
       const queued = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: { input: textInput("standard turn"), serviceTier: "default" },
       });
       archiveThread(harness.db, harness.hub, thread.id);
       await expect(
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           thread,
           payload: {
             input: textInput("rejected"),
@@ -1621,6 +1645,7 @@ describe("concurrent idle dispatch regression", () => {
       const results = await Promise.allSettled(
         Array.from({ length: 4 }, (_, index) =>
           acceptThreadSendRequest(harness.deps, {
+            messageAuthor: null,
             thread,
             payload: {
               input: textInput(`concurrent message ${index}`),
@@ -1653,6 +1678,7 @@ describe("competing turn refusals", () => {
     fixture: IdleThreadFixture,
   ) {
     await sendThreadMessage(harness.deps, {
+      messageAuthor: null,
       environment: fixture.environment,
       payload: {
         input: textInput("send while the daemon runs a turn"),
@@ -1778,6 +1804,118 @@ describe("competing turn refusals", () => {
       });
 
       expect(getThread(harness.db, fixture.thread.id)?.status).toBe("error");
+    });
+  });
+});
+
+describe("message author", () => {
+  const peter = { login: "peter@medfinder.com", name: "Peter" };
+
+  function lastTurnRequestData(harness: TestAppHarness, threadId: string) {
+    const requests = listEvents(harness.db, { threadId }).filter(
+      (event) => event.type === "client/turn/requested",
+    );
+    const last = requests.at(-1);
+    if (last === undefined) throw new Error("No turn request was recorded");
+    return JSON.parse(last.data) as Record<string, unknown>;
+  }
+
+  it("records the human author on a direct send", async () => {
+    await withTestHarness(async (harness) => {
+      const { environment, thread } = seedColdIdleThreadFixture({
+        harness,
+        value: 41,
+      });
+
+      await sendThreadMessage(harness.deps, {
+        environment,
+        messageAuthor: peter,
+        payload: {
+          input: textInput("authored send"),
+          mode: "start",
+          model: "gpt-5",
+          permissionMode: "full",
+          reasoningLevel: "medium",
+          serviceTier: "default",
+        },
+        thread,
+        trigger: "user",
+      });
+
+      expect(lastTurnRequestData(harness, thread.id)).toMatchObject({
+        initiator: "user",
+        author: peter,
+      });
+    });
+  });
+
+  it.each([
+    { path: "idle fast path", fixture: seedProviderThreadFixture, value: 43 },
+    { path: "general dispatch", fixture: seedColdIdleThreadFixture, value: 44 },
+  ])(
+    "keeps the queued author when the $path sends the row",
+    async ({ fixture, value }) => {
+      await withTestHarness(async (harness) => {
+        const { thread } = fixture({ harness, value });
+        const queued = seedQueuedMessage(harness.deps, {
+          author: peter,
+          threadId: thread.id,
+          content: textInput("queued by Peter"),
+        });
+
+        await sendQueuedMessage(harness.deps, {
+          claimPolicy: {
+            kind: "automatic",
+            isGroupEligible: createAutomaticQueuedMessageGroupEligibility(
+              harness.deps,
+              { now: Date.now(), retryingFailure: false, thread },
+            ),
+            retryingFailure: false,
+          },
+          threadId: thread.id,
+          queuedMessageId: queued.id,
+          mode: "auto",
+        });
+
+        expect(lastTurnRequestData(harness, thread.id)).toMatchObject({
+          initiator: "user",
+          author: peter,
+        });
+      });
+    },
+  );
+
+  it("records no human author on an agent send, whatever the request carried", async () => {
+    await withTestHarness(async (harness) => {
+      const { environment, thread } = seedColdIdleThreadFixture({
+        harness,
+        value: 42,
+      });
+      const senderThread = seedThread(harness.deps, {
+        environmentId: environment.id,
+        projectId: thread.projectId,
+      });
+
+      await sendThreadMessage(harness.deps, {
+        environment,
+        messageAuthor: peter,
+        payload: {
+          input: textInput("agent send"),
+          mode: "start",
+          model: "gpt-5",
+          permissionMode: "full",
+          reasoningLevel: "medium",
+          senderThreadId: senderThread.id,
+          serviceTier: "default",
+        },
+        thread,
+        trigger: "user",
+      });
+
+      expect(lastTurnRequestData(harness, thread.id)).toMatchObject({
+        initiator: "agent",
+        author: null,
+      });
     });
   });
 });

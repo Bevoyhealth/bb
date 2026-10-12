@@ -26,11 +26,13 @@ import {
 import type { Hono } from "hono";
 import {
   createStandaloneBuiltinCompactCommandInput,
+  type MessageAuthor,
   type Thread,
   type ThreadQueuedMessage,
 } from "@bb/domain";
 import type { AppDeps } from "../../types.js";
 import { ApiError } from "../../errors.js";
+import { getRequestAuthor } from "../../request-context.js";
 import {
   emitPluginMessageCancelled,
   emitPluginThreadUnarchived,
@@ -133,6 +135,7 @@ function toQueuedMessageOrderResponse(
 async function compactThreadContext(
   deps: AppDeps,
   thread: Thread,
+  messageAuthor: MessageAuthor | null,
 ): Promise<void> {
   ensureThreadIsWritable(thread);
   if (!deps.providerRegistry.supportsManualCompaction(thread.providerId)) {
@@ -157,6 +160,7 @@ async function compactThreadContext(
       input: createStandaloneBuiltinCompactCommandInput(),
       mode: "start",
     },
+    messageAuthor,
     thread,
     trigger: "user",
   });
@@ -239,7 +243,11 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
   post(routes.send, async (context, payload) => {
     const thread = requirePublicThread(deps.db, context.req.param("id"));
     return context.json(
-      await acceptThreadSendRequest(deps, { payload, thread }),
+      await acceptThreadSendRequest(deps, {
+        messageAuthor: getRequestAuthor(context),
+        payload,
+        thread,
+      }),
     );
   });
 
@@ -249,6 +257,7 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
       thread,
     });
     const result = await editThreadMessage(deps, {
+      editor: getRequestAuthor(context),
       environment,
       payload,
       thread,
@@ -266,6 +275,7 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
   post(routes.createQueuedMessage, async (context, payload) => {
     const thread = requirePublicThread(deps.db, context.req.param("id"));
     const queuedMessage = await createQueuedMessageForThread(deps, {
+      messageAuthor: getRequestAuthor(context),
       payload,
       thread,
     });
@@ -386,7 +396,7 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
 
   post(routes.compact, async (context) => {
     const thread = requirePublicThread(deps.db, context.req.param("id"));
-    await compactThreadContext(deps, thread);
+    await compactThreadContext(deps, thread, getRequestAuthor(context));
     return context.json({ ok: true });
   });
 

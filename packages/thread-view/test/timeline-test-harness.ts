@@ -5,6 +5,7 @@ import {
   turnScope,
 } from "@bb/domain";
 import type {
+  MessageAuthor,
   ApprovalPendingInteractionResolution,
   ClientTurnRequestId,
   CompletedTurnDisplay,
@@ -84,6 +85,8 @@ interface DefaultTurnEventOptions extends EventFactoryRowOptions {
 }
 
 type ClientTurnRequestedArgs = EventFactoryRowOptions & {
+  author?: MessageAuthor | null;
+  editor?: MessageAuthor | null;
   execution?: ResolvedThreadExecutionOptions;
   initiator?: ThreadTurnInitiator;
   input?: PromptInput[];
@@ -696,6 +699,8 @@ export function createTimelineEventFactory(
           source: args.source ?? "tell",
           initiator,
           senderThreadId,
+          ...(args.author !== undefined ? { author: args.author } : {}),
+          ...(args.editor !== undefined ? { editor: args.editor } : {}),
           ...(args.systemMessageKind !== undefined
             ? { systemMessageKind: args.systemMessageKind }
             : {}),

@@ -28,6 +28,7 @@ import type {
   PromptInput,
   QueuedMessagePayload,
   QueuedMessageSystemNotice,
+  MessageAuthor,
   StartedOnBehalfOf,
   ThreadCreateOrigin,
   QueuedMessageWaitHolder,
@@ -70,6 +71,7 @@ export interface CreateQueuedThreadMessageInput {
    * a thread-start has a requester and no message sender.
    */
   requestedBy?: StartedOnBehalfOf | null;
+  author?: MessageAuthor | null;
   model: string;
   reasoningLevel: string;
   permissionMode: PermissionMode;
@@ -348,6 +350,7 @@ function queuedMessageGroupingEnvelopeMatches(
   return (
     firstQueuedMessage !== null &&
     queuedMessage.senderThreadId === firstQueuedMessage.senderThreadId &&
+    queuedMessage.authorLogin === firstQueuedMessage.authorLogin &&
     queuedMessage.model === firstQueuedMessage.model &&
     queuedMessage.reasoningLevel === firstQueuedMessage.reasoningLevel &&
     queuedMessage.permissionMode === firstQueuedMessage.permissionMode &&
@@ -478,10 +481,7 @@ function resolveQueuedThreadMessageNeighbor(
     return false;
   }
 
-  const neighbor = getQueuedThreadMessage(
-    db,
-    args.neighborQueuedMessageId,
-  );
+  const neighbor = getQueuedThreadMessage(db, args.neighborQueuedMessageId);
   if (
     !neighbor ||
     neighbor.threadId !== args.threadId ||
@@ -530,7 +530,8 @@ function applyQueuedThreadMessageGroupBoundary(
     const groupedMessages = queuedMessages.slice(0, boundaryIndex + 1);
     const hasMixedSender = groupedMessages.some(
       (queuedMessage) =>
-        queuedMessage.senderThreadId !== firstQueuedMessage?.senderThreadId,
+        queuedMessage.senderThreadId !== firstQueuedMessage?.senderThreadId ||
+        queuedMessage.authorLogin !== firstQueuedMessage?.authorLogin,
     );
     if (hasMixedSender) {
       return { kind: "invalid_sender" };
@@ -624,6 +625,8 @@ export function createQueuedThreadMessageInTransaction(
       originPluginId: input.originPluginId ?? null,
       requestedByInitiator: input.requestedBy?.initiator ?? null,
       requestedByThreadId: input.requestedBy?.senderThreadId ?? null,
+      authorLogin: input.author?.login ?? null,
+      authorName: input.author?.name ?? null,
       model: input.model,
       reasoningLevel: input.reasoningLevel,
       permissionMode: input.permissionMode,
@@ -909,10 +912,7 @@ export function listIdleThreadsWithQueuedMessages(
           notExists(manuallyStoppedQueuePauseQuery(db, threads.id)),
           notOrdinaryTurnEndQueuedThreadMessage(),
         ),
-        or(
-          isNull(threads.environmentId),
-          ne(environments.status, "destroyed"),
-        ),
+        or(isNull(threads.environmentId), ne(environments.status, "destroyed")),
         // Only rows an idle thread actually unblocks. A thread whose only
         // queued row is waiting on a clock or a plugin is not a drain
         // candidate, and listing it would re-run the whole send pipeline
@@ -1105,10 +1105,7 @@ export function reorderQueuedThreadMessage({
   try {
     result = db.transaction(
       (tx): ReorderQueuedThreadMessageResult => {
-        const movedQueuedMessage = getQueuedThreadMessage(
-          tx,
-          queuedMessageId,
-        );
+        const movedQueuedMessage = getQueuedThreadMessage(tx, queuedMessageId);
         if (!movedQueuedMessage || movedQueuedMessage.threadId !== threadId) {
           return { kind: "not_found" };
         }
@@ -1838,7 +1835,10 @@ export function listRetryableFailedQueuedThreadMessages(
         ),
       ),
     )
-    .orderBy(asc(queuedThreadMessages.nextAttemptAt), asc(queuedThreadMessages.id))
+    .orderBy(
+      asc(queuedThreadMessages.nextAttemptAt),
+      asc(queuedThreadMessages.id),
+    )
     .all();
 }
 

@@ -412,6 +412,7 @@ function buildOptimisticQueuedMessage({
     originPluginId: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
     threadId: request.id,
     content: request.input,
     model: request.model ?? defaultExecutionOptions?.model ?? "pending",
@@ -692,6 +693,8 @@ function buildOptimisticUserMessageRow({
     attachments: timelineAttachments,
     initiator: "user",
     senderThreadId: null,
+    author: null,
+    editor: null,
     systemMessageKind: "unlabeled",
     systemMessageSubject: null,
     turnRequest: {
@@ -898,8 +901,9 @@ export function applyCreateThreadResult({
   const cachedHostId =
     environmentId === null
       ? null
-      : (queryClient.getQueryData<Environment>(environmentQueryKey(environmentId))
-          ?.hostId ?? null);
+      : (queryClient.getQueryData<Environment>(
+          environmentQueryKey(environmentId),
+        )?.hostId ?? null);
   const selectedHostId =
     request.environment.type === "provider" &&
     request.environment.machine?.type === "existing"

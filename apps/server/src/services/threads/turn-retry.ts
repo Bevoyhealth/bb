@@ -228,6 +228,7 @@ export async function retryFailedTurn(
       retryOf: { requestId: originalRequestId, attempt },
       origin: null,
       originPluginId: null,
+      messageAuthor: null,
       startedOnBehalfOf: null,
       trigger: "user",
     });

@@ -256,6 +256,7 @@ describe("message.dispatch hook context", () => {
 
       const sendAt = Date.now() + 60_000;
       const response = await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: {
           input: textInput("scheduled draft"),
           mode: "auto",
@@ -340,6 +341,7 @@ describe("pending admission races", () => {
       expect(stale.status).toBe("pending");
       const attempt = (text: string) =>
         attemptDispatch(harness.deps, {
+          messageAuthor: null,
           thread: stale,
           payload: { input: textInput(text), mode: "start" },
           source: { kind: "inline" },
@@ -586,6 +588,7 @@ describe("message.dispatch hook admission visibility", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("first follow-up"), mode: "auto" },
         thread,
       });
@@ -605,6 +608,7 @@ describe("message.dispatch hook admission visibility", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("a steer"), mode: "steer" },
         thread: getThread(harness.db, thread.id)!,
       });
@@ -659,6 +663,7 @@ describe("dispatch hooks and the no-hook path", () => {
 
       const error = await expectApiError(() =>
         acceptThreadSendRequest(harness.deps, {
+          messageAuthor: null,
           payload: { input: textInput("actually, stop"), mode: "steer" },
           thread,
         }),
@@ -699,6 +704,7 @@ describe("message.dispatch hook message author", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("typed by hand"), mode: "auto" },
         thread,
       });
@@ -721,6 +727,7 @@ describe("message.dispatch hook message author", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: {
           input: textInput("sent by an agent"),
           mode: "auto",
@@ -744,6 +751,7 @@ describe("message.dispatch hook message author", () => {
       const originalRequestId = createClientTurnRequestId();
 
       await attemptDispatch(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: { input: textInput("retried work"), mode: "auto" },
         source: { kind: "inline" },
@@ -798,6 +806,7 @@ describe("message.dispatch hook message author", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: {
           input: textInput("sent by an agent"),
           mode: "auto",
@@ -946,6 +955,7 @@ describe("message.dispatch hook message author", () => {
       });
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("a follow-up"), mode: "auto" },
         thread,
       });
@@ -983,6 +993,7 @@ describe("message.dispatch hook message author", () => {
       });
 
       await attemptDispatch(harness.deps, {
+        messageAuthor: null,
         thread,
         payload: { input: textInput("spawned work"), mode: "auto" },
         source: { kind: "inline" },
@@ -1254,6 +1265,7 @@ describe("message.dispatch hooks on the queue drain", () => {
       };
 
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: {
           input: textInput("queued draft"),
           mode: "auto",
@@ -1282,6 +1294,7 @@ describe("message.dispatch hooks on the queue drain", () => {
         status: "idle",
       });
       const queued = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("queued work") },
         thread,
       });
@@ -1325,6 +1338,7 @@ describe("message.dispatch hooks on the queue drain", () => {
         status: "idle",
       });
       const queued = await createQueuedMessageForThread(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("stay paused") },
         thread,
       });

@@ -21,6 +21,7 @@ function queuedMessage(
     originPluginId: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
     threadId: "thread-1",
     content: [{ type: "text", text: "Follow up", mentions: [] }],
     model: "gpt-5",
@@ -242,9 +243,13 @@ describe("bb thread organization commands", () => {
     }
   });
 
-  it("shows agent and system senders in queued message rows", async () => {
+  it("shows the author, agent, and system senders in queued message rows", async () => {
     const list = vi.fn(async () => [
       queuedMessage({ id: "queued-user" }),
+      queuedMessage({
+        id: "queued-peter",
+        author: { login: "peter@medfinder.com", name: "Peter" },
+      }),
       queuedMessage({
         id: "queued-agent",
         initiator: "agent",
@@ -261,6 +266,7 @@ describe("bb thread organization commands", () => {
       .mock.calls.map((args) => args.join(" "))
       .join("\n");
     expect(output).toContain("Sender");
+    expect(output).toContain("peter@medfinder.com");
     expect(output).toContain("thr_sender");
     expect(output).toContain("System");
   });

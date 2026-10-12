@@ -115,6 +115,7 @@ describe("child outcome reconciliation", () => {
     await withTestHarness(async (harness) => {
       const fixture = seedFamily(harness, "late-acceptance");
       await sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment: fixture.environment,
         payload: {
           input: textInput("continue"),

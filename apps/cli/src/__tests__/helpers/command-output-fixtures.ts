@@ -99,6 +99,8 @@ export function makePendingSteerTimelineRow(): TimelineUserConversationRow {
     mentions: [],
     initiator: "user",
     senderThreadId: null,
+    author: null,
+    editor: null,
     systemMessageKind: "unlabeled",
     systemMessageSubject: null,
     turnRequest: { isGrouped: false, kind: "steer", status: "pending" },

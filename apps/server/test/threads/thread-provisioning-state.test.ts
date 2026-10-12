@@ -48,6 +48,7 @@ describe("thread provisioning state", () => {
     const context = requestThreadProvision(
       { db, hub },
       {
+        messageAuthor: null,
         thread,
         environmentIntent: {
           type: "provider",
