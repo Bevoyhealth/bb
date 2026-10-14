@@ -43,6 +43,8 @@ function conversationRow({
       role: "user",
       initiator: "user",
       senderThreadId: null,
+      author: null,
+      editor: null,
       systemMessageKind: "unlabeled",
       systemMessageSubject: null,
       turnRequest: {

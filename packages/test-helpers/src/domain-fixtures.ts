@@ -202,6 +202,7 @@ export function makeThreadQueuedMessage(
     originPluginId: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
     threadId: "thr_test",
     content: [{ type: "text", text: "Queued message", mentions: [] }],
     model: "gpt-5.5",

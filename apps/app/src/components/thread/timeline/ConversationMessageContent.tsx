@@ -96,6 +96,8 @@ interface ConversationMessageContentUserProps extends ConversationMessageContent
   resolveSegmentLinkHref?: TimelineTitleLinkResolver;
   onOpenLink?: ThreadTimelineLinkHandler;
   onTitleAction?: TimelineTitleActionResolver;
+  author: TimelineUserConversationRow["author"];
+  editor: TimelineUserConversationRow["editor"];
   senderThreadId: TimelineUserConversationRow["senderThreadId"];
   senderThreadProjectId?: string;
   senderThreadTitle: string | null;
@@ -162,6 +164,8 @@ interface UserConversationMessageProps {
   resolveMentionLink?: PromptMentionLinkResolver;
   resolveSegmentLinkHref?: TimelineTitleLinkResolver;
   onTitleAction?: TimelineTitleActionResolver;
+  author: TimelineUserConversationRow["author"];
+  editor: TimelineUserConversationRow["editor"];
   senderThreadId: TimelineUserConversationRow["senderThreadId"];
   senderThreadProjectId: string | null;
   senderThreadTitle: string | null;
@@ -331,6 +335,8 @@ function buildAddToChatAttachments(
 function UserConversationMessage({
   addToChatAttachments,
   attachmentItems,
+  author,
+  editor,
   originKind,
   initiator,
   mentions,
@@ -418,16 +424,31 @@ function UserConversationMessage({
   const mutePrefixLength = computeMutedPrefixLength(initiator, text);
   const messageText = text.trim();
   const requestLabel = turnRequestLabel(turnRequest);
+  const editorName =
+    editor !== null && editor.login !== author?.login ? editor.name : null;
 
   return (
     <div className="w-full" data-message-column="">
       <div className="group/message ml-auto flex w-fit max-w-[70%] flex-col items-end">
-        {requestLabel ? (
+        {requestLabel || author !== null || editorName !== null ? (
           <div className="mb-1 flex items-center justify-end gap-2">
-            <TurnRequestLabel
-              turnRequest={turnRequest}
-              icon="ArrowTurnForward"
-            />
+            {author !== null || editorName !== null ? (
+              <span
+                className="truncate text-xs leading-none text-muted-foreground"
+                data-message-author=""
+                title={author?.login}
+              >
+                {author?.name}
+                {author !== null && editorName !== null ? " · " : null}
+                {editorName !== null ? `edited by ${editorName}` : null}
+              </span>
+            ) : null}
+            {requestLabel ? (
+              <TurnRequestLabel
+                turnRequest={turnRequest}
+                icon="ArrowTurnForward"
+              />
+            ) : null}
           </div>
         ) : null}
         <div className="flex w-fit max-w-full flex-col items-end">
@@ -667,6 +688,8 @@ export function ConversationMessageContent(
         resolveMentionLink={props.resolveMentionLink}
         resolveSegmentLinkHref={props.resolveSegmentLinkHref}
         onTitleAction={props.onTitleAction}
+        author={props.author}
+        editor={props.editor}
         senderThreadId={props.senderThreadId}
         senderThreadProjectId={props.senderThreadProjectId ?? null}
         senderThreadTitle={props.senderThreadTitle}

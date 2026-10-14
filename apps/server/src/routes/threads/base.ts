@@ -19,6 +19,7 @@ import {
   type UpdateThreadInput,
 } from "@bb/db";
 import type { Environment, Thread, ThreadListEntry } from "@bb/domain";
+import { getRequestAuthor } from "../../request-context.js";
 import { toEnvironmentResponse } from "../../services/environments/environment-response.js";
 import {
   threadIncludeOptionSchema,
@@ -349,15 +350,23 @@ export function registerThreadBaseRoutes(app: Hono, deps: AppDeps): void {
     if (payload.sectionId) {
       requireThreadSection(deps, payload.sectionId);
     }
-    const thread = await createThreadFromRequest(deps, {
-      ...payload,
-      origin: payload.origin,
-    });
+    const thread = await createThreadFromRequest(
+      deps,
+      {
+        ...payload,
+        origin: payload.origin,
+      },
+      { messageAuthor: getRequestAuthor(context) },
+    );
     return context.json(toThreadResponseFromThread(deps, { thread }), 201);
   });
 
   post(routes.fork, async (context, payload) => {
-    const thread = await createThreadForkFromRequest(deps, payload);
+    const thread = await createThreadForkFromRequest(
+      deps,
+      payload,
+      getRequestAuthor(context),
+    );
     return context.json(toThreadResponseFromThread(deps, { thread }), 201);
   });
 

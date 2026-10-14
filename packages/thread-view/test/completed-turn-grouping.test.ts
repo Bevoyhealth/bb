@@ -68,6 +68,8 @@ function userMessage(args: UserMessageArgs): EventProjectionUserMessage {
     kind: "user",
     initiator: args.initiator ?? "user",
     senderThreadId: null,
+    author: null,
+    editor: null,
     systemMessageKind: "unlabeled",
     systemMessageSubject: null,
     turnRequest: args.turnRequest ?? {

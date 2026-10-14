@@ -1,6 +1,6 @@
 import { getEnvironment, getThread } from "@bb/db";
 import type { EnvironmentRow } from "@bb/db";
-import type { PromptInput, Thread } from "@bb/domain";
+import type { MessageAuthor, PromptInput, Thread } from "@bb/domain";
 import type { ForkThreadRequest } from "@bb/server-contract";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
 import { ApiError } from "../../errors.js";
@@ -62,6 +62,7 @@ function requireSourceEnvironment(
 export async function createThreadForkFromRequest(
   deps: ThreadForkDeps,
   request: ForkThreadRequest,
+  messageAuthor: MessageAuthor | null,
 ) {
   const sourceThread = requireForkSourceThread(deps, request.sourceThreadId);
   requireForkCapableProvider(deps, sourceThread);
@@ -113,6 +114,7 @@ export async function createThreadForkFromRequest(
       visibility: request.visibility,
     },
     {
+      messageAuthor,
       forkSourceEnvironmentId: sourceEnvironment.id,
       ...(isSeedOnlyIdleFork ? { providerInput: [] } : {}),
     },

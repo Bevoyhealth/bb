@@ -158,6 +158,7 @@ async function sendUserMessage(
   },
 ): Promise<void> {
   await sendThreadMessage(harness.deps, {
+    messageAuthor: null,
     environment: args.environment,
     payload: {
       input: args.input ?? textInput("continue"),

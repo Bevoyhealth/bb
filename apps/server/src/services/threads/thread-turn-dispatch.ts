@@ -4,6 +4,7 @@ import type {
   SystemMessageKind,
   SystemMessageSubject,
   Thread,
+  MessageAuthor,
   ThreadTurnInitiator,
 } from "@bb/domain";
 import { getThread, type DbTransaction, type EnvironmentRow } from "@bb/db";
@@ -27,6 +28,7 @@ export interface ReadyThreadEnvironment extends EnvironmentRow {
 
 interface DispatchTurnDuringReprovisionArgs {
   beforeRequestAppendInTransaction?: (args: { tx: DbTransaction }) => void;
+  author: MessageAuthor | null;
   deps: LoggedPendingInteractionWorkSessionDeps;
   environment: EnvironmentRow;
   execution: ResolvedThreadExecutionOptions;
@@ -80,6 +82,7 @@ export async function dispatchTurnDuringReprovision(
           throwEnvironmentNotReady(args.environment);
         }
       },
+      author: args.author,
       environment: args.environment,
       execution: args.execution,
       initiator: args.initiator,

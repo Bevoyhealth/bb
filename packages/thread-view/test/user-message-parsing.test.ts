@@ -162,6 +162,40 @@ describe("user message parsing", () => {
     });
   });
 
+  it("carries the recorded author and editor of a human message", () => {
+    const event = createTimelineEventFactory({ threadId: "thread-1" });
+    const { event: decoded, meta } = decodeThreadEventRow(
+      event.clientTurnRequested({
+        author: { login: "peter@medfinder.com", name: "Peter" },
+        editor: { login: "simran@insitohealth.com", name: "Simran" },
+        text: "Hello",
+      }),
+    );
+
+    expect(
+      parseUsersFromClientRequest({
+        decoded,
+        meta,
+        options: standardProjectionOptions,
+      })[0],
+    ).toMatchObject({
+      author: { login: "peter@medfinder.com", name: "Peter" },
+      editor: { login: "simran@insitohealth.com", name: "Simran" },
+    });
+  });
+
+  it("shows no author for a message recorded before authors existed", () => {
+    const { event, meta } = decodeThreadEventRow(userMessageRequest());
+
+    expect(
+      parseUsersFromClientRequest({
+        decoded: event,
+        meta,
+        options: standardProjectionOptions,
+      })[0],
+    ).toMatchObject({ author: null, editor: null });
+  });
+
   it("renders grouped queued turn requests as separate user messages", () => {
     const factory = createTimelineEventFactory({ threadId: "thread-1" });
     const row = factory.clientTurnRequested({

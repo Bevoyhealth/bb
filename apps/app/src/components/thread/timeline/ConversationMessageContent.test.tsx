@@ -82,6 +82,8 @@ describe("ConversationMessageContent user images", () => {
             mentions={[]}
             originKind={null}
             senderThreadId={null}
+            author={null}
+            editor={null}
             senderThreadTitle={null}
             senderIsPluginSideChat={false}
             systemMessageKind="unlabeled"
@@ -104,6 +106,59 @@ describe("ConversationMessageContent user images", () => {
     ).toBe(
       "/api/v1/threads/thr_image/host-files/content?path=%2Fworkspace%2Foutput%2Fdiagram.png",
     );
+  });
+});
+
+describe("ConversationMessageContent user message author", () => {
+  function renderUserMessage(args: {
+    author: { login: string; name: string } | null;
+    editor: { login: string; name: string } | null;
+  }) {
+    return render(
+      <MemoryRouter>
+        <RouteNavigationProvider>
+          <ConversationMessageContent
+            role="user"
+            attachments={null}
+            initiator="user"
+            mentions={[]}
+            originKind={null}
+            senderThreadId={null}
+            author={args.author}
+            editor={args.editor}
+            senderThreadTitle={null}
+            senderIsPluginSideChat={false}
+            systemMessageKind="unlabeled"
+            systemMessageSubject={null}
+            text="Please rerun the tests"
+            threadId="thr_author"
+            turnRequest={{
+              isGrouped: false,
+              kind: "message",
+              status: "accepted",
+            }}
+          />
+        </RouteNavigationProvider>
+      </MemoryRouter>,
+    );
+  }
+
+  it("shows the author name and the editor of an edited message", () => {
+    const { container } = renderUserMessage({
+      author: { login: "peter@medfinder.com", name: "Peter" },
+      editor: { login: "simran@insitohealth.com", name: "Simran" },
+    });
+
+    const label = container.querySelector("[data-message-author]");
+    expect(label?.textContent).toBe("Peter · edited by Simran");
+    expect(label?.getAttribute("title")).toBe("peter@medfinder.com");
+  });
+
+  it("shows no author label for a message without a recorded author", () => {
+    const { container } = renderUserMessage({ author: null, editor: null });
+
+    expect(container.querySelector("[data-message-author]")).toBeNull();
+    expect(screen.getByText("Please rerun the tests")).toBeTruthy();
   });
 });
 
@@ -182,6 +237,8 @@ describe("ConversationMessageContent long user messages", () => {
               initiator="user"
               mentions={[]}
               senderThreadId={null}
+              author={null}
+              editor={null}
               senderThreadTitle={null}
               senderIsPluginSideChat={false}
               systemMessageKind="unlabeled"
@@ -214,6 +271,8 @@ describe("ConversationMessageContent long user messages", () => {
             initiator="user"
             mentions={[]}
             senderThreadId={null}
+            author={null}
+            editor={null}
             senderThreadTitle={null}
             senderIsPluginSideChat={false}
             systemMessageKind="unlabeled"
@@ -326,6 +385,8 @@ describe("ConversationMessageContent user thread mentions", () => {
               initiator="user"
               mentions={[]}
               senderThreadId={null}
+              author={null}
+              editor={null}
               senderThreadTitle={null}
               senderIsPluginSideChat={false}
               systemMessageKind="unlabeled"
@@ -371,6 +432,8 @@ describe("ConversationMessageContent user thread mentions", () => {
               initiator="user"
               mentions={[]}
               senderThreadId={null}
+              author={null}
+              editor={null}
               senderThreadTitle={null}
               senderIsPluginSideChat={false}
               systemMessageKind="unlabeled"
@@ -417,6 +480,8 @@ describe("ConversationMessageContent user thread mentions", () => {
               initiator="user"
               mentions={[]}
               senderThreadId={null}
+              author={null}
+              editor={null}
               senderThreadTitle={null}
               senderIsPluginSideChat={false}
               systemMessageKind="unlabeled"
@@ -467,6 +532,8 @@ describe("ConversationMessageContent user thread mentions", () => {
                   : null
               }
               senderThreadId={null}
+              author={null}
+              editor={null}
               senderThreadTitle={null}
               senderIsPluginSideChat={false}
               systemMessageKind="unlabeled"

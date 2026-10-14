@@ -10,6 +10,7 @@ import {
   type SystemMessageKind,
   type SystemMessageSubject,
   type Thread,
+  type MessageAuthor,
   type ThreadTurnInitiator,
   type TurnRequestTarget,
 } from "@bb/domain";
@@ -58,6 +59,7 @@ interface RequestThreadProvisionArgs {
   execution: ResolvedThreadExecutionOptions;
   fork: ThreadForkDescriptor | null;
   input: PromptInput[];
+  messageAuthor: MessageAuthor | null;
   providerInput?: PromptInput[];
   startedOnBehalfOf: StartedOnBehalfOf | null;
   thread: Thread;
@@ -66,6 +68,7 @@ interface RequestThreadProvisionArgs {
 
 interface RequestThreadTargetReprovisionArgs {
   beforeRequestAppendInTransaction?: (args: { tx: DbTransaction }) => void;
+  author: MessageAuthor | null;
   environment: EnvironmentRow;
   execution: ResolvedThreadExecutionOptions;
   input: PromptInput[];
@@ -287,7 +290,8 @@ export function requestThreadProvision(
   args: RequestThreadProvisionArgs,
 ): ThreadProvisionContext {
   return deps.db.transaction(() => {
-    const { initiator, senderThreadId } = resolveDispatchAuthor({
+    const { author, initiator, senderThreadId } = resolveDispatchAuthor({
+      messageAuthor: args.messageAuthor,
       retrying: false,
       senderThreadId: null,
       startedOnBehalfOf: args.startedOnBehalfOf,
@@ -299,6 +303,7 @@ export function requestThreadProvision(
       type: "client/turn/requested",
       input: args.input,
       execution: args.execution,
+      author,
       initiator,
       senderThreadId,
       requestMethod: "thread/start",
@@ -439,6 +444,7 @@ function appendReprovisionTurnRequest(
               ? { inputGroups: args.inputGroups }
               : {}),
             execution: args.execution,
+            author: args.author,
             initiator: args.initiator,
             senderThreadId: args.senderThreadId,
             systemMessageKind: args.systemMessageKind,

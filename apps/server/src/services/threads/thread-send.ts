@@ -6,6 +6,7 @@ import {
 import type { DbConnection, DbTransaction, EnvironmentRow } from "@bb/db";
 import type {
   ClientTurnRequestId,
+  MessageAuthor,
   PromptInput,
   ResolvedThreadExecutionOptions,
   Thread,
@@ -100,6 +101,8 @@ interface SendThreadMessageArgs {
     forkSourceProviderThreadId: string | null;
     onCommandSettled?: () => void | Promise<void>;
   };
+  editor?: MessageAuthor;
+  messageAuthor: MessageAuthor | null;
   payload: SendThreadMessagePayload;
   thread: Thread;
   trigger: SendThreadMessageTrigger;
@@ -146,8 +149,10 @@ interface SendThreadMessageQueueRequest {
 interface AppendAndQueueSendThreadMessageArgs {
   /** Retry provenance; absent for an original dispatch. */
   retryOf?: TurnRequestRetryMarker;
+  author: MessageAuthor | null;
   beforeAppendInTransaction?: SendThreadMessageTransactionPreflight;
   db: DbConnection;
+  editor?: MessageAuthor;
   environmentId: string | null;
   execution: ResolvedThreadExecutionOptions;
   initiator: ThreadTurnInitiator;
@@ -398,8 +403,10 @@ export function captureUserMessageSentTelemetry(
 
 function appendAndQueueSendThreadMessageInTransaction({
   retryOf,
+  author,
   beforeAppendInTransaction,
   db,
+  editor,
   environmentId,
   execution,
   initiator,
@@ -427,6 +434,8 @@ function appendAndQueueSendThreadMessageInTransaction({
             input,
             ...(inputGroups !== undefined ? { inputGroups } : {}),
             execution,
+            author,
+            ...(editor !== undefined ? { editor } : {}),
             initiator,
             senderThreadId,
             requestMethod: "turn/start",
@@ -547,7 +556,8 @@ async function sendThreadMessageWithoutContextClear(
   // `system` whatever the original was: nobody asked for it a second time, and
   // counting it as a user message would inflate every "messages sent" figure by
   // however many times the provider happened to be rate limited.
-  const { initiator } = resolveDispatchAuthor({
+  const { author, initiator } = resolveDispatchAuthor({
+    messageAuthor: args.messageAuthor,
     retrying: args.retryOf !== undefined,
     senderThreadId,
     startedOnBehalfOf: null,
@@ -590,6 +600,7 @@ async function sendThreadMessageWithoutContextClear(
 
   if (
     await dispatchTurnDuringReprovision({
+      author,
       beforeRequestAppendInTransaction: beforeAppendInTransaction,
       deps,
       environment,
@@ -671,7 +682,9 @@ async function sendThreadMessageWithoutContextClear(
         beforeAppendInTransaction({ tx });
         ensureThreadCanStartRequest(thread);
       },
+      author,
       db: deps.db,
+      ...(args.editor !== undefined ? { editor: args.editor } : {}),
       environmentId: thread.environmentId,
       execution,
       initiator,
@@ -763,8 +776,10 @@ async function sendThreadMessageWithoutContextClear(
   });
   const queuedRequest = appendAndQueueSendThreadMessageInTransaction({
     ...(args.retryOf !== undefined ? { retryOf: args.retryOf } : {}),
+    author,
     beforeAppendInTransaction,
     db: deps.db,
+    ...(args.editor !== undefined ? { editor: args.editor } : {}),
     environmentId: thread.environmentId,
     execution,
     initiator,

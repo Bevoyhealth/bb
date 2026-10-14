@@ -14,6 +14,7 @@ import type {
   QueuedMessageSystemNotice,
   QueuedMessageWaitingOn,
   ResolvedThreadExecutionOptions,
+  MessageAuthor,
   StartedOnBehalfOf,
   Thread,
   ThreadCreateOrigin,
@@ -72,6 +73,7 @@ export interface QueuedDispatchMessage {
   origin: ThreadCreateOrigin | null;
   originPluginId: string | null;
   requestedBy: StartedOnBehalfOf | null;
+  author: MessageAuthor | null;
   payload: QueuedMessagePayload;
   /** Non-null only when core is queueing one of its own system notices. */
   systemNotice: QueuedMessageSystemNotice | null;
@@ -128,6 +130,7 @@ export function recordQueuedMessageWait(
           origin: args.message.origin,
           originPluginId: args.message.originPluginId,
           requestedBy: args.message.requestedBy,
+          author: args.message.author,
           model: args.message.execution.model,
           reasoningLevel: args.message.execution.reasoningLevel,
           permissionMode: args.message.execution.permissionMode,

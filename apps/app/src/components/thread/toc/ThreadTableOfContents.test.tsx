@@ -87,6 +87,8 @@ function userConversationRow(index = 1): TimelineConversationRow {
     attachments: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
+    editor: null,
     systemMessageKind: "unlabeled",
     systemMessageSubject: null,
     turnRequest: {
@@ -1057,11 +1059,14 @@ describe("ThreadTableOfContents", () => {
   });
 
   it("finds active items with logarithmic row measurements", () => {
-    const allItems = Array.from({ length: 256 }, (_, index): TocItem => ({
-      id: `item-${index}`,
-      label: `Message ${index}`,
-      role: index % 2 === 0 ? "user" : "assistant",
-    }));
+    const allItems = Array.from(
+      { length: 256 },
+      (_, index): TocItem => ({
+        id: `item-${index}`,
+        label: `Message ${index}`,
+        role: index % 2 === 0 ? "user" : "assistant",
+      }),
+    );
     const manyUserItems = allItems.filter((item) => item.role === "user");
     const manyAgentItems = allItems.filter((item) => item.role === "assistant");
     const visibleIndex = 200;

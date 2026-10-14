@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { threadCreateOriginSchema } from "./thread-create-origin.js";
+import { messageAuthorSchema } from "./thread-events.js";
 import { environmentWorkspaceDisplayKindSchema } from "./environment.js";
 import { gitCheckoutRefSchema } from "./git-checkout.js";
 import {
@@ -339,6 +340,7 @@ export const threadQueuedMessageSchema = z.object({
   originPluginId: z.string().nullable(),
   initiator: z.enum(["user", "agent", "system"]),
   senderThreadId: z.string().nullable(),
+  author: messageAuthorSchema.nullable(),
   /**
    * The thread this row is waiting on. Redundant on the thread-scoped list
    * route that first served this DTO, and load-bearing everywhere else it is

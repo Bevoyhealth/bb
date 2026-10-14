@@ -345,6 +345,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
     const { environment, thread } = seedColdIdleThreadFixture(harness, 1);
 
     await sendThreadMessage(harness.deps, {
+      messageAuthor: null,
       environment,
       payload: {
         input: pluginMentionInput({
@@ -401,6 +402,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
     const { environment, thread } = seedColdIdleThreadFixture(harness, 11);
 
     await sendThreadMessage(harness.deps, {
+      messageAuthor: null,
       environment,
       payload: {
         input: pluginMentionInput({
@@ -496,6 +498,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
 
     await expect(
       sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           input: pluginMentionInput({
@@ -542,6 +545,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
     await harness.pluginService.setEnabled("mentions", false);
     await expect(
       sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           ...basePayload,
@@ -563,6 +567,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
 
     await expect(
       sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           ...basePayload,
@@ -580,6 +585,7 @@ describe("plugin mention providers (bb.ui.registerMentionProvider)", () => {
 
     await expect(
       sendThreadMessage(harness.deps, {
+        messageAuthor: null,
         environment,
         payload: {
           ...basePayload,

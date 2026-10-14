@@ -319,6 +319,7 @@ describe("the requested queue drain", () => {
         status: "idle",
       });
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("plugin-held lead"), mode: "auto" },
         thread,
       });
@@ -464,6 +465,7 @@ describe("the requested queue drain", () => {
 
       // Queued inline, so the re-queue pacing window never opens.
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("held work"), mode: "auto" },
         thread,
       });
@@ -626,6 +628,7 @@ describe("the requested queue drain", () => {
         status: "active",
       });
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: {
           input: textInput("after this turn"),
           mode: "queue-if-active",
@@ -667,6 +670,7 @@ describe("the requested queue drain", () => {
         status: "idle",
       });
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("held work"), mode: "auto" },
         thread,
       });
@@ -705,6 +709,7 @@ describe("the requested queue drain", () => {
         status: "idle",
       }).thread;
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("first in"), mode: "auto" },
         thread: first,
       });
@@ -713,6 +718,7 @@ describe("the requested queue drain", () => {
         status: "idle",
       }).thread;
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("second in"), mode: "auto" },
         thread: second,
       });
@@ -788,6 +794,7 @@ describe("requesting a drain", () => {
         status: "idle",
       });
       await acceptThreadSendRequest(harness.deps, {
+        messageAuthor: null,
         payload: { input: textInput("held work"), mode: "auto" },
         thread,
       });

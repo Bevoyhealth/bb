@@ -315,6 +315,7 @@ export function makeQueueEntry(
     originPluginId: null,
     initiator: "user",
     senderThreadId: null,
+    author: null,
     threadId: "thread-1",
     content: [{ type: "text", text: "Queued turn", mentions: [] }],
     model: "test-model",

@@ -162,6 +162,7 @@ async function deliverLegacyDeferredRow(
   }
   if (parsed.data.kind === "send") {
     await acceptThreadSendRequest(deps, {
+      messageAuthor: null,
       payload: toSendPayload(parsed.data.request),
       thread,
     });

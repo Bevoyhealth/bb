@@ -43,6 +43,7 @@ import type {
   SystemMessageSubject,
   ThreadEventScope,
   ThreadTurnInitiator,
+  MessageAuthor,
   ThreadChangeKind,
   ThreadChangeMetadata,
   Thread,
@@ -80,6 +81,8 @@ interface ClientTurnRequestedEventArgs {
    * asked for.
    */
   retryOf?: TurnRequestRetryMarker;
+  author: MessageAuthor | null;
+  editor?: MessageAuthor;
   environmentId: string | null;
   execution: ResolvedThreadExecutionOptions;
   initiator: ThreadTurnInitiator;
@@ -210,6 +213,8 @@ function buildClientTurnRequestedEventData(
         }
       : {}),
     senderThreadId: args.senderThreadId,
+    author: args.author,
+    ...(args.editor !== undefined ? { editor: args.editor } : {}),
     ...(args.systemMessageKind !== undefined
       ? { systemMessageKind: args.systemMessageKind }
       : {}),

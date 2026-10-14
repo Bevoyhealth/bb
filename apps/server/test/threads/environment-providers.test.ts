@@ -1482,6 +1482,7 @@ describe("environment providers are asked inside provisioning", () => {
       if (failedThread === null) return;
 
       const outcome = await attemptDispatch(harness.deps, {
+        messageAuthor: null,
         thread: failedThread,
         payload: { input: textInput("Retry the task"), mode: "start" },
         source: { kind: "inline" },

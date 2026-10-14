@@ -28,6 +28,7 @@ import type {
   EnvironmentProviderSelection,
   EnvironmentStatus,
   PermissionMode,
+  MessageAuthor,
   PromptInput,
   QueuedMessageWaitingOn,
   RecordedPermissionMode,
@@ -258,6 +259,7 @@ export function seedThreadFixture(
 export function seedQueuedMessage(
   deps: Pick<AppDeps, "db" | "hub">,
   args: {
+    author?: MessageAuthor | null;
     content: PromptInput[];
     threadId: string;
     model?: string;
@@ -272,6 +274,7 @@ export function seedQueuedMessage(
 ) {
   return createQueuedThreadMessage(deps.db, deps.hub, {
     threadId: args.threadId,
+    author: args.author ?? null,
     content: args.content,
     model: args.model ?? "gpt-5",
     reasoningLevel: args.reasoningLevel ?? "medium",

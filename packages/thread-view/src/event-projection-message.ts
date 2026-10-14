@@ -4,6 +4,7 @@ import type {
   ExtensionKind,
   JsonObject,
   JsonValue,
+  MessageAuthor,
   OwnershipChangeOperationMetadata,
   PendingInteractionUserAnswer,
   PendingInteractionUserQuestionQuestion,
@@ -100,6 +101,8 @@ export interface EventProjectionUserMessage extends EventProjectionMessageBase {
   kind: "user";
   initiator: ThreadTurnInitiator;
   senderThreadId: string | null;
+  author: MessageAuthor | null;
+  editor: MessageAuthor | null;
   systemMessageKind: SystemMessageKind;
   systemMessageSubject: SystemMessageSubject | null;
   turnRequest: EventProjectionTurnRequest;

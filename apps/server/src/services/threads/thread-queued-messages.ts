@@ -4,6 +4,7 @@ import {
   threadQueuedMessageSchema,
 } from "@bb/domain";
 import type {
+  MessageAuthor,
   PermissionMode,
   PromptInput,
   QueuedMessagePayload,
@@ -19,6 +20,8 @@ import { ApiError } from "../../errors.js";
 import { resolveDispatchAuthor } from "./dispatch-author.js";
 
 interface StoredQueuedThreadMessageRow {
+  authorLogin: string | null;
+  authorName: string | null;
   origin: ThreadCreateOrigin | null;
   originPluginId: string | null;
   claimedAt: number | null;
@@ -156,13 +159,21 @@ function toQueuedMessagePayload(
   };
 }
 
+export function storedQueuedThreadMessageAuthor(
+  row: Pick<StoredQueuedThreadMessageRow, "authorLogin" | "authorName">,
+): MessageAuthor | null {
+  if (row.authorLogin === null || row.authorName === null) return null;
+  return { login: row.authorLogin, name: row.authorName };
+}
+
 export function toThreadQueuedMessage(
   row: StoredQueuedThreadMessageRow,
 ): ThreadQueuedMessage {
   const author =
     row.systemNotice !== null
-      ? { initiator: "system" as const, senderThreadId: null }
+      ? { author: null, initiator: "system" as const, senderThreadId: null }
       : resolveDispatchAuthor({
+          messageAuthor: storedQueuedThreadMessageAuthor(row),
           retrying: row.payloadKind === "retry",
           senderThreadId: row.senderThreadId,
           startedOnBehalfOf: storedQueuedThreadMessageRequestedBy(row),
@@ -173,6 +184,7 @@ export function toThreadQueuedMessage(
     originPluginId: row.originPluginId,
     initiator: author.initiator,
     senderThreadId: author.senderThreadId,
+    author: author.author,
     threadId: row.threadId,
     content: parseStoredQueuedThreadMessageContent(row),
     model: row.model,
