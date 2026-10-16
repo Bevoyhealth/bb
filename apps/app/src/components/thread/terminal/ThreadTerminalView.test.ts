@@ -7,6 +7,7 @@ import {
   buildTerminalThemeFromCssColors,
   applyTerminalFontFamily,
   captureTerminalContextMenuState,
+  createTerminalPtyResizeSender,
   encodeTerminalInputChunks,
   forceTerminalFontMeasurement,
   focusTerminalFromTouchRelease,
@@ -18,6 +19,7 @@ import {
   startTerminalTouchFocusGesture,
   TERMINAL_ALLOW_PROPOSED_API,
   TERMINAL_FONT_FAMILY,
+  TERMINAL_PTY_RESIZE_SETTLE_MS,
   resolveTerminalFontFamily,
   writeTerminalOutput,
   updateTerminalTouchFocusGesture,
@@ -537,5 +539,58 @@ describe("loadTerminalWebglRenderer", () => {
 
     expect(loadTerminalWebglRenderer(terminal, () => addon)).toBe(false);
     expect(addon.dispose).toHaveBeenCalledOnce();
+  });
+});
+
+describe("terminal PTY resize sender", () => {
+  it("sends only the final size after a drag settles", () => {
+    vi.useFakeTimers();
+    try {
+      const send = vi.fn();
+      const sender = createTerminalPtyResizeSender(send);
+
+      for (let cols = 100; cols >= 30; cols -= 2) {
+        sender.schedule(cols, 30);
+        vi.advanceTimersByTime(16);
+      }
+      expect(send).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(TERMINAL_PTY_RESIZE_SETTLE_MS);
+      expect(send.mock.calls).toEqual([[30, 30]]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("drops a pending size when the terminal closes", () => {
+    vi.useFakeTimers();
+    try {
+      const send = vi.fn();
+      const sender = createTerminalPtyResizeSender(send);
+
+      sender.schedule(80, 24);
+      sender.cancel();
+      vi.advanceTimersByTime(TERMINAL_PTY_RESIZE_SETTLE_MS * 2);
+
+      expect(send).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("sends an immediate size at once and replaces a pending one", () => {
+    vi.useFakeTimers();
+    try {
+      const send = vi.fn();
+      const sender = createTerminalPtyResizeSender(send);
+
+      sender.schedule(60, 24);
+      sender.sendNow(80, 24);
+      vi.advanceTimersByTime(TERMINAL_PTY_RESIZE_SETTLE_MS * 2);
+
+      expect(send.mock.calls).toEqual([[80, 24]]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
