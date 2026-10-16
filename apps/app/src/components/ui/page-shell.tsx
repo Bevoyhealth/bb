@@ -91,7 +91,7 @@ export function PageShell({
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <div
           className={cn(
-            "@container/page min-h-0 flex-1 overflow-y-auto",
+            "@container/page min-h-0 flex-1 overflow-y-auto overscroll-y-none",
             scrollAreaClassName,
           )}
         >
