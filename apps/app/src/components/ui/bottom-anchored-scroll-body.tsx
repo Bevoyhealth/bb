@@ -918,7 +918,7 @@ export function BottomAnchoredScrollBody({
           <div
             ref={scrollAreaRef}
             className={cn(
-              "thread-scrollbar @container/page col-start-1 row-start-1 min-h-0 overflow-x-hidden overflow-y-auto",
+              "thread-scrollbar @container/page col-start-1 row-start-1 min-h-0 overflow-x-hidden overflow-y-auto overscroll-y-none",
               scrollAreaClassName,
             )}
           >

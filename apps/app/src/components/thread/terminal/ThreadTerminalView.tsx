@@ -234,13 +234,18 @@ interface HasVisibleTerminalSizeArgs {
   entries?: readonly ResizeObserverEntry[];
 }
 
+export const TERMINAL_SELECTION_COLOR =
+  "color-mix(in oklch, var(--foreground) 35%, var(--sidebar))";
+
 function readResolvedCssColor(
   probe: HTMLElement,
-  varName: string,
+  nameOrColor: string,
 ): string | undefined {
-  const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
+  const raw = nameOrColor.startsWith("--")
+    ? getComputedStyle(document.documentElement)
+        .getPropertyValue(nameOrColor)
+        .trim()
+    : nameOrColor;
   if (!raw) {
     return undefined;
   }
@@ -265,7 +270,7 @@ export function buildTerminalThemeFromCssColors(
     foreground: get("--foreground"),
     cursor: get("--foreground"),
     cursorAccent: get("--sidebar"),
-    selectionBackground: get("--muted"),
+    selectionBackground: get(TERMINAL_SELECTION_COLOR),
     black: get("--ansi-0"),
     red: get("--ansi-1"),
     green: get("--ansi-2"),

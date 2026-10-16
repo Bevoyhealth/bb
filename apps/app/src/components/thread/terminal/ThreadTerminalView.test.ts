@@ -18,6 +18,7 @@ import {
   startTerminalTouchFocusGesture,
   TERMINAL_ALLOW_PROPOSED_API,
   TERMINAL_FONT_FAMILY,
+  TERMINAL_SELECTION_COLOR,
   resolveTerminalFontFamily,
   writeTerminalOutput,
   updateTerminalTouchFocusGesture,
@@ -360,6 +361,18 @@ describe("buildTerminalThemeFromCssColors", () => {
 
     expect(theme.background).toBe("--sidebar");
     expect(theme.cursorAccent).toBe("--sidebar");
+  });
+
+  it("highlights selections with a foreground mix strong enough to see on the terminal surface", () => {
+    const get = vi.fn((name: string) => name);
+
+    const theme = buildTerminalThemeFromCssColors(get);
+
+    expect(theme.selectionBackground).toBe(TERMINAL_SELECTION_COLOR);
+    const share = Number(
+      TERMINAL_SELECTION_COLOR.match(/var\(--foreground\) (\d+)%, var\(--sidebar\)\)$/)?.[1],
+    );
+    expect(share).toBeGreaterThanOrEqual(30);
   });
 });
 
