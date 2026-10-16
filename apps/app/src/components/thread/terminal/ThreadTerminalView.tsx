@@ -477,6 +477,41 @@ export function forwardTerminalData({
   }
 }
 
+export const TERMINAL_PTY_RESIZE_SETTLE_MS = 100;
+
+export interface TerminalPtyResizeSender {
+  cancel: () => void;
+  schedule: (cols: number, rows: number) => void;
+  sendNow: (cols: number, rows: number) => void;
+}
+
+export function createTerminalPtyResizeSender(
+  send: (cols: number, rows: number) => void,
+): TerminalPtyResizeSender {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const cancel = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+  const sendNow = (cols: number, rows: number) => {
+    cancel();
+    send(cols, rows);
+  };
+  return {
+    cancel,
+    schedule: (cols, rows) => {
+      cancel();
+      timer = setTimeout(() => {
+        timer = null;
+        sendNow(cols, rows);
+      }, TERMINAL_PTY_RESIZE_SETTLE_MS);
+    },
+    sendNow,
+  };
+}
+
 function hasVisibleTerminalSize({
   containerElement,
   entries,
@@ -883,6 +918,7 @@ export function ThreadTerminalView({
       suppressedWriteCount: 0,
     };
     let resizeAnimationFrame: number | null = null;
+    let ptyResizeSender: TerminalPtyResizeSender | null = null;
     let selectionAnimationFrame: number | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let selectionChangeDisposable: { dispose: () => void } | null = null;
@@ -973,7 +1009,7 @@ export function ThreadTerminalView({
           return;
         }
         fitAddon.fit();
-        transport?.sendResize(terminal.cols, terminal.rows);
+        ptyResizeSender?.schedule(terminal.cols, terminal.rows);
       };
       const scheduleFit: TerminalFitScheduler = () => {
         if (resizeAnimationFrame !== null) {
@@ -1075,7 +1111,10 @@ export function ThreadTerminalView({
         url: buildTerminalWebSocketUrl({ terminalId: session.id }),
       });
       transport = activeTransport;
-      activeTransport.sendResize(activeTerminal.cols, activeTerminal.rows);
+      ptyResizeSender = createTerminalPtyResizeSender((cols, rows) =>
+        activeTransport.sendResize(cols, rows),
+      );
+      ptyResizeSender.sendNow(activeTerminal.cols, activeTerminal.rows);
       activeTransport.start();
       const sendTerminalInput = (dataBase64: string) =>
         activeTransport.sendInput(dataBase64);
@@ -1136,6 +1175,7 @@ export function ThreadTerminalView({
         window.cancelAnimationFrame(selectionAnimationFrame);
       }
       resizeObserver?.disconnect();
+      ptyResizeSender?.cancel();
       selectionChangeDisposable?.dispose();
       transport?.dispose();
       terminal?.dispose();
